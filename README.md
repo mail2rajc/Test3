@@ -10,126 +10,162 @@
 
 ### Insights
 
-Based on the provided dataset from Goodreads, we can analyze several aspects to derive insights about books, their ratings, authors, and publication years. Below, I suggest some analyses along with Python code snippets for implementation.
+Based on the dataset details you've provided, there are numerous potential insights and analyses that you could conduct. Here are some suggested analyses, along with relevant Python code snippets to help you execute them:
 
-### Suggested Analyses and Insights
+### Suggested Analyses & Insights
 
 1. **Distribution of Average Ratings**:
-   Understand how the average ratings are distributed among books.
+   - Analyze the distribution of average ratings across the dataset to identify popular trends in book ratings.
 
-   ```python
-   import pandas as pd
-   import matplotlib.pyplot as plt
-   import seaborn as sns
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-   # Load the dataset
-   df = pd.read_csv(r'E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\goodreads.csv')
+# Load the data
+df = pd.read_csv(r'E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\goodreads.csv')
 
-   # Plot the distribution of average ratings
-   plt.figure(figsize=(10, 5))
-   sns.histplot(df['average_rating'], bins=30, kde=True)
-   plt.title('Distribution of Average Ratings')
-   plt.xlabel('Average Rating')
-   plt.ylabel('Frequency')
-   plt.show()
-   ```
+# Plotting the distribution of average ratings
+plt.figure(figsize=(10, 6))
+sns.histplot(df['average_rating'], bins=30, kde=True)
+plt.title('Distribution of Average Ratings')
+plt.xlabel('Average Rating')
+plt.ylabel('Frequency')
+plt.show()
+```
 
-2. **Top Authors by Average Ratings**:
-   Identify who the highest-rated authors are based on average ratings of their books.
+2. **Top Authors by the Number of Books**:
+   - Identify the top authors with the most books represented in the dataset.
 
-   ```python
-   # Group by authors and calculate the mean average rating
-   top_authors = df.groupby('authors')['average_rating'].mean().sort_values(ascending=False).head(10)
+```python
+# Count occurrences of each author
+top_authors = df['authors'].value_counts().head(10)
 
-   # Plotting
-   top_authors.plot(kind='bar', figsize=(10, 5), title='Top 10 Authors by Average Ratings')
-   plt.ylabel('Average Rating')
-   plt.xlabel('Authors')
-   plt.xticks(rotation=45)
-   plt.show()
-   ```
+# Plotting top authors
+plt.figure(figsize=(12, 6))
+top_authors.plot(kind='bar')
+plt.title('Top 10 Authors by Number of Books')
+plt.xlabel('Authors')
+plt.ylabel('Number of Books')
+plt.xticks(rotation=45)
+plt.show()
+```
 
-3. **Books Published Over Time**:
-   Analyze the trend of books published over different years.
+3. **Average Rating by Publication Year**:
+   - Investigate how the average rating varies with the year of publication.
 
-   ```python
-   # Convert original_publication_year to int (drop NaNs)
-   publication_years = df['original_publication_year'].dropna().astype(int)
+```python
+# Cleaning the data for publication year
+df['original_publication_year'] = df['original_publication_year'].dropna().astype(int)
 
-   # Count the number of books published each year
-   publication_count = publication_years.value_counts().sort_index()
+# Grouping by publication year and calculating average rating
+avg_rating_by_year = df.groupby('original_publication_year')['average_rating'].mean().reset_index()
 
-   # Plotting
-   plt.figure(figsize=(12, 6))
-   publication_count.plot(kind='line')
-   plt.title('Number of Books Published Over the Years')
-   plt.xlabel('Publication Year')
-   plt.ylabel('Number of Books')
-   plt.grid()
-   plt.show()
-   ```
+# Plotting the average rating over the year
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=avg_rating_by_year, x='original_publication_year', y='average_rating')
+plt.title('Average Rating by Publication Year')
+plt.xlabel('Publication Year')
+plt.ylabel('Average Rating')
+plt.show()
+```
 
-4. **Language Distribution**:
-   Assess the distribution of languages in the dataset.
+4. **Rating Counts vs Average Ratings**:
+   - Explore the relationship between the total number of ratings and the average rating to determine if there’s a correlation.
 
-   ```python
-   # Count of books available in each language
-   language_distribution = df['language_code'].value_counts()
+```python
+# Scatter plot for ratings_count and average_rating
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='ratings_count', y='average_rating', data=df)
+plt.title('Ratings Count vs Average Rating')
+plt.xlabel('Ratings Count')
+plt.ylabel('Average Rating')
+plt.xscale('log')  # Log scale for better visibility
+plt.show()
+```
 
-   # Plotting
-   plt.figure(figsize=(10, 5))
-   sns.barplot(x=language_distribution.index, y=language_distribution.values)
-   plt.title('Distribution of Languages')
-   plt.xlabel('Language Code')
-   plt.ylabel('Number of Books')
-   plt.xticks(rotation=45)
-   plt.show()
-   ```
+5. **Books by Language**:
+   - Analyze the number of books available per language to understand the linguistic diversity of the dataset.
 
-5. **Correlation between Ratings and Reviews**:
-   Analyze how the number of ratings and text reviews correlate with average ratings.
+```python
+# Count the number of books for each language
+language_counts = df['language_code'].value_counts()
 
-   ```python
-   # Compute the correlation matrix
-   correlation = df[['average_rating', 'ratings_count', 'work_text_reviews_count']].corr()
+# Plotting the language distribution
+plt.figure(figsize=(12, 6))
+language_counts.plot(kind='bar')
+plt.title('Number of Books by Language')
+plt.xlabel('Language Code')
+plt.ylabel('Number of Books')
+plt.xticks(rotation=45)
+plt.show()
+```
 
-   # Heatmap
-   plt.figure(figsize=(8, 6))
-   sns.heatmap(correlation, annot=True, cmap='coolwarm')
-   plt.title('Correlation Heatmap')
-   plt.show()
-   ```
+6. **Trend Analysis on Ratings**:
+   - Analyze the distribution of ratings (1 to 5) for highly rated books.
 
-6. **Top Rated Books**:
-   Identify the top 10 rated books in the dataset.
+```python
+# Filter for books with average rating more than a certain threshold, e.g., 4.0
+highly_rated_books = df[df['average_rating'] > 4.0]
 
-   ```python
-   # Get the top 10 books by average rating
-   top_rated_books = df.nlargest(10, 'average_rating')[['title', 'authors', 'average_rating']]
+# Melt the ratings columns for easier plotting
+ratings_columns = ['ratings_1', 'ratings_2', 'ratings_3', 'ratings_4', 'ratings_5']
+melted_ratings = highly_rated_books.melt(value_vars=ratings_columns, 
+                                           var_name='rating', 
+                                           value_name='count')
 
-   print(top_rated_books)
-   ```
+# Plotting the distribution of ratings
+plt.figure(figsize=(10, 6))
+sns.barplot(x='rating', y='count', data=melted_ratings)
+plt.title('Distribution of Ratings (1 to 5) for Highly Rated Books')
+plt.xlabel('Ratings')
+plt.ylabel('Count')
+plt.show()
+```
 
-7. **Analysis of ISBN Data**:
-   Analyze the missing values in ISBN columns and its potential impact.
+### Additional Considerations
 
-   ```python
-   # Check missing values in ISBN columns
-   missing_isbn = df[['isbn', 'isbn13']].isnull().sum()
-   print(missing_isbn)
-   ```
+- **Handling Missing Values**: Investigate the reasons for missing values in `isbn`, `isbn13`, and `original_publication_year`. This can affect the analysis, especially if those columns are integral to your analyses.
 
-### Conclusion and Next Steps
-The suggested analyses can help in understanding dataset properties, identifying trends, and deriving actionable insights. Depending on the results, further analyses can be performed to dive deeper into specific areas such as demographic influences on ratings, popular genres if available, etc.
+- **Normalization of Ratings**: Consider normalizing the ratings count if you wish to compare or aggregate rating performance across various sections of your dataset.
+
+- **Filtering Data**: Depending on your analysis goals, you might want to filter out books with low ratings or those with very few ratings before diving deeper into ratings analysis.
+
+By carrying out these analyses, you can uncover various insights that could help in understanding reader preferences, the impact of publication year on ratings, and overall trends in the dataset.
 
 ### Visualizations
 
-![book_id_distribution.png](book_id_distribution.png)
+![correlation_heatmap.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\correlation_heatmap.png)
 
-![goodreads_book_id_distribution.png](goodreads_book_id_distribution.png)
+![book_id_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\book_id_distribution.png)
 
+![goodreads_book_id_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\goodreads_book_id_distribution.png)
 
+![best_book_id_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\best_book_id_distribution.png)
 
-### Additional Reports
+![work_id_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\work_id_distribution.png)
 
-- [Dataset Summary](summary_report.txt)
+![books_count_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\books_count_distribution.png)
+
+![isbn13_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\isbn13_distribution.png)
+
+![original_publication_year_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\original_publication_year_distribution.png)
+
+![average_rating_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\average_rating_distribution.png)
+
+![ratings_count_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_count_distribution.png)
+
+![work_ratings_count_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\work_ratings_count_distribution.png)
+
+![work_text_reviews_count_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\work_text_reviews_count_distribution.png)
+
+![ratings_1_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_1_distribution.png)
+
+![ratings_2_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_2_distribution.png)
+
+![ratings_3_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_3_distribution.png)
+
+![ratings_4_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_4_distribution.png)
+
+![ratings_5_distribution.png](E:\RajC\IIT\IIT Madras\Sep 2024\TDS\Project\P2\\charts\ratings_5_distribution.png)
+
